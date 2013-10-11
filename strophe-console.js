@@ -19,6 +19,7 @@ var StropheConsole = {
                         'color: #eee;' +
                         'position: relative;' +
                         '}' +
+        '.xmpp_incoming { background-color: #333; }' +
         '.xml_punc { color: #888; }' +
         '.xml_tag { color: #e77; }' +
         '.xml_aname { color: #55d; }' +
@@ -101,7 +102,7 @@ var StropheConsole = {
 
     addTraffic: function(msg, type) {
         $('#console-log').append(
-            '<div class="' + type + '">' +
+            '<div class="xmpp_' + type + '">' +
                 StropheConsole.prettyXml(msg) +
                 '</div>');
     },
