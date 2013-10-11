@@ -43,6 +43,8 @@ var StropheConsole = {
           '</div>' +
         '</div>',
 
+    _connection: null,
+
     init: function(options) {
         $(document).ready(function() {
             $('<style>' + StropheConsole.baseCss + '</style>').appendTo('head');
@@ -62,6 +64,17 @@ var StropheConsole = {
                     }
                 }
             });
+
+            $('#console-input').keydown(function(evt) {
+                evt = evt || window.event;
+                if (evt.which === 13) {
+                    var xml = StropheConsole.textToXml($('#console-input').val());
+                    if (xml && StropheConsole._connection) {
+                        StropheConsole._connection.send(xml);
+                        $('#console-input').val('');
+                    }
+                }
+            });
         });
     },
 
@@ -71,6 +84,7 @@ var StropheConsole = {
             'console',
             {
                 init: function(conn) {
+                    StropheConsole._connection = conn;
                     conn.xmlInput = function(body) {
                         StropheConsole.showTraffic(body, 'incoming', debugBosh);
                     };
@@ -168,5 +182,28 @@ var StropheConsole = {
         }
 
         return result.join('');
+    },
+
+    textToXml: function(text) {
+        var doc = null;
+        if (window['DOMParser']) {
+            var parser = new DOMParser();
+            doc = parser.parseFromString(text, 'text/xml');
+        } else if (window['ActiveXObject']) {
+            doc = new ActiveXObject('MSXML2.DOMDocument');
+            doc.async = false;
+            doc.loadXML(text);
+        } else {
+            throw {
+                type: 'StropheConsoleError',
+                message: 'No DOMParser object found.'
+            };
+        }
+
+        var elem = doc.documentElement;
+        if ($(elem).filter('parsererror').length > 0) {
+            return null;
+        }
+        return elem;
     }
 };
